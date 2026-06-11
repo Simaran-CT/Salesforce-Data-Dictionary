@@ -48,8 +48,7 @@
   .filter-btn { padding: 9px 16px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: #94a3b8; font-size: 12px; cursor: pointer; transition: all 0.2s; }
   .filter-btn.active-filter { border-color: #6366f1; color: #a5b4fc; background: rgba(99,102,241,0.15); }
   .filter-btn:hover { border-color: #6366f1; color: #a5b4fc; }
-  .report-btn { padding: 9px 18px; border-radius: 8px; background: linear-gradient(135deg, #059669, #0891b2); border: none; color: #fff; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 6px; }
-  .report-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(5,150,105,0.4); }
+
 
   /* Table */
   .table-wrap { border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.07); }
@@ -132,23 +131,7 @@
 
 <div class="content" id="mainContent"></div>
 
-<!-- Report Modal -->
-<div class="modal-bg" id="reportModal">
-  <div class="modal">
-    <h2>🗂 Build a Report</h2>
-    <p>Select the type of report you want to create for <span id="modalObjName" style="color:#a5b4fc;font-weight:600"></span>.</p>
-    <div class="report-grid" id="reportGrid"></div>
-    <div class="report-output" id="reportOutput">
-      <h3 id="reportOutputTitle"></h3>
-      <pre id="reportOutputContent"></pre>
-      <button class="copy-btn" onclick="copyReport()">📋 Copy to Clipboard</button>
-    </div>
-    <div class="modal-footer">
-      <button class="close-btn" onclick="closeModal()">Close</button>
-      <button class="generate-btn" onclick="generateReport()">Generate →</button>
-    </div>
-  </div>
-</div>
+
 
 <script>
 const OBJECTS = {
@@ -331,44 +314,7 @@ const OBJECTS = {
   }
 };
 
-const REPORT_TYPES = {
-  Lead: [
-    { title: "Lead Funnel Report", desc: "Track leads from Warm → MQL → SQL by region and SDR" },
-    { title: "Lead Lost Analysis", desc: "Breakdown of lost reasons, sub-reasons and segments" },
-    { title: "MQL Attribution Report", desc: "MQL volume by channel, source and campaign" },
-    { title: "SDR Activity Report", desc: "Next steps, timelines and authority mapping per SDR" },
-  ],
-  Account: [
-    { title: "Account Health Dashboard", desc: "Health scores, PAS scores and platform utilization" },
-    { title: "Renewal Pipeline Report", desc: "Contract end dates, ACV at risk and renewal status" },
-    { title: "Onboarding Status Report", desc: "Go-live dates, onboarding stages by CSM and region" },
-    { title: "Segment & Vertical Analysis", desc: "ACV breakdown by business segment and vertical" },
-  ],
-  Opportunity: [
-    { title: "Pipeline Report", desc: "Open deals by stage, region, ACV and forecast category" },
-    { title: "Win/Loss Analysis", desc: "Closed deals by won/lost reason and competition" },
-    { title: "Bookings & ARR Report", desc: "Booking ARR by deal type, region and quarter" },
-    { title: "Churn Analysis Report", desc: "Churned deals by cause, sub-cause and AE" },
-  ],
-  Contract: [
-    { title: "Renewal Tracker", desc: "Contracts by end date, ACV and renewal opportunity" },
-    { title: "Billing & Payment Report", desc: "Billing frequency, method and payment terms overview" },
-    { title: "Discount Analysis", desc: "Platform discount percentages across active contracts" },
-    { title: "Legal Entity Report", desc: "Contract distribution by legal entity and term length" },
-  ],
-  Contact: [
-    { title: "Stakeholder Map", desc: "Contacts by classification, role and health status" },
-    { title: "Champion Coverage Report", desc: "Champion and Economic Buyer coverage per account" },
-    { title: "Contact Health Report", desc: "Red/Amber/Green status across accounts" },
-    { title: "Engagement Overview", desc: "Contacts by account with titles and LinkedIn coverage" },
-  ],
-  Quote: [
-    { title: "Quote Approval Report", desc: "Quotes by status (Draft, Approved, Rejected) and owner" },
-    { title: "Discount Report", desc: "Platform and WhatsApp discount percentages per quote" },
-    { title: "Pricing Model Analysis", desc: "Quotes by billing plan, frequency and payment method" },
-    { title: "Competitive Intensity Report", desc: "Deals by competitive intensity and incumbent in play" },
-  ]
-};
+
 
 let currentObj = "Lead";
 let selectedReport = null;
@@ -440,7 +386,7 @@ function renderContent(search = "") {
     <div class="toolbar">
       <input class="search-box" id="searchInput" placeholder="🔍  Search field name, API name, or description…" value="${search}" oninput="renderContent(this.value)"/>
       ${types.map(t => `<button class="filter-btn ${currentFilter===t?'active-filter':''}" onclick="setFilter('${t}')">${t}</button>`).join("")}
-      <button class="report-btn" onclick="openModal()">🗂 Build Report</button>
+
     </div>
     <div class="table-wrap">
       <table>
@@ -533,9 +479,7 @@ function renderAll() {
   renderContent();
 }
 
-document.getElementById("reportModal").addEventListener("click", function(e) {
-  if (e.target === this) closeModal();
-});
+
 
 renderAll();
 </script>
