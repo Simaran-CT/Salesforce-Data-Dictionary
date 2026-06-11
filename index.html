@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Salesforce Data Dictionary</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', sans-serif; background: #0f0f1a; color: #e2e8f0; min-height: 100vh; }
+
+  /* Header */
+  .header { background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #1e3a5f 100%); padding: 32px 40px 24px; border-bottom: 1px solid rgba(99,102,241,0.3); }
+  .header-top { display: flex; align-items: center; gap: 14px; margin-bottom: 8px; }
+  .logo { width: 38px; height: 38px; background: linear-gradient(135deg, #6366f1, #06b6d4); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+  .header h1 { font-size: 24px; font-weight: 700; background: linear-gradient(90deg, #a5b4fc, #67e8f9); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .header p { color: #94a3b8; font-size: 13px; margin-top: 4px; }
+
+  /* How to use banner */
+  .how-to { margin: 24px 40px; background: rgba(99,102,241,0.1); border: 1px solid rgba(99,102,241,0.25); border-radius: 12px; padding: 16px 20px; display: flex; gap: 14px; align-items: flex-start; }
+  .how-to-icon { font-size: 20px; margin-top: 1px; }
+  .how-to h3 { font-size: 13px; font-weight: 600; color: #a5b4fc; margin-bottom: 4px; }
+  .how-to p { font-size: 12.5px; color: #94a3b8; line-height: 1.6; }
+
+  /* Object Buttons */
+  .objects-section { padding: 0 40px; margin-bottom: 28px; }
+  .objects-section h2 { font-size: 12px; text-transform: uppercase; letter-spacing: 1.2px; color: #6366f1; font-weight: 600; margin-bottom: 14px; }
+  .obj-buttons { display: flex; flex-wrap: wrap; gap: 10px; }
+  .obj-btn {
+    padding: 10px 20px; border-radius: 8px; border: 1px solid rgba(99,102,241,0.3);
+    background: rgba(30,27,75,0.6); color: #c7d2fe; font-size: 13px; font-weight: 500;
+    cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 8px;
+  }
+  .obj-btn:hover { background: rgba(99,102,241,0.25); border-color: #6366f1; color: #fff; transform: translateY(-1px); }
+  .obj-btn.active { background: linear-gradient(135deg, #4f46e5, #0891b2); border-color: transparent; color: #fff; box-shadow: 0 4px 15px rgba(99,102,241,0.4); }
+  .obj-badge { background: rgba(255,255,255,0.15); border-radius: 4px; padding: 1px 7px; font-size: 11px; }
+
+  /* Main content */
+  .content { padding: 0 40px 40px; }
+  .obj-header { margin-bottom: 20px; }
+  .obj-title { font-size: 20px; font-weight: 700; color: #fff; margin-bottom: 6px; }
+  .obj-desc { font-size: 13px; color: #94a3b8; line-height: 1.6; max-width: 720px; }
+
+  /* Toolbar */
+  .toolbar { display: flex; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; align-items: center; }
+  .search-box { flex: 1; min-width: 200px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 9px 14px; color: #e2e8f0; font-size: 13px; outline: none; }
+  .search-box:focus { border-color: #6366f1; background: rgba(99,102,241,0.1); }
+  .search-box::placeholder { color: #475569; }
+  .filter-btn { padding: 9px 16px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: #94a3b8; font-size: 12px; cursor: pointer; transition: all 0.2s; }
+  .filter-btn.active-filter { border-color: #6366f1; color: #a5b4fc; background: rgba(99,102,241,0.15); }
+  .filter-btn:hover { border-color: #6366f1; color: #a5b4fc; }
+  .report-btn { padding: 9px 18px; border-radius: 8px; background: linear-gradient(135deg, #059669, #0891b2); border: none; color: #fff; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 6px; }
+  .report-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(5,150,105,0.4); }
+
+  /* Table */
+  .table-wrap { border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.07); }
+  table { width: 100%; border-collapse: collapse; }
+  thead { background: rgba(99,102,241,0.15); }
+  th { padding: 12px 16px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px; color: #6366f1; font-weight: 600; text-align: left; }
+  tbody tr { border-top: 1px solid rgba(255,255,255,0.05); transition: background 0.15s; }
+  tbody tr:hover { background: rgba(99,102,241,0.08); }
+  td { padding: 12px 16px; font-size: 13px; color: #cbd5e1; vertical-align: top; }
+  td:first-child { color: #e2e8f0; font-weight: 500; }
+  .api-name { font-family: 'Courier New', monospace; font-size: 12px; color: #67e8f9; background: rgba(6,182,212,0.1); padding: 2px 7px; border-radius: 4px; }
+  .custom-field { color: #f59e0b; }
+  .type-badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 500; }
+  .type-Text { background: rgba(99,102,241,0.2); color: #a5b4fc; }
+  .type-Picklist { background: rgba(236,72,153,0.15); color: #f9a8d4; }
+  .type-Date { background: rgba(234,179,8,0.15); color: #fde047; }
+  .type-Lookup { background: rgba(16,185,129,0.15); color: #6ee7b7; }
+  .type-Formula { background: rgba(245,158,11,0.15); color: #fcd34d; }
+  .type-Checkbox { background: rgba(59,130,246,0.15); color: #93c5fd; }
+  .type-Number { background: rgba(139,92,246,0.15); color: #c4b5fd; }
+  .type-Currency { background: rgba(5,150,105,0.15); color: #6ee7b7; }
+  .type-Phone { background: rgba(239,68,68,0.15); color: #fca5a5; }
+  .type-Email { background: rgba(14,165,233,0.15); color: #7dd3fc; }
+  .type-URL { background: rgba(168,85,247,0.15); color: #d8b4fe; }
+  .type-Percent { background: rgba(251,146,60,0.15); color: #fdba74; }
+  .type-Long { background: rgba(107,114,128,0.2); color: #d1d5db; }
+  .type-Autonumber { background: rgba(20,184,166,0.15); color: #5eead4; }
+
+  /* Report modal */
+  .modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 100; align-items: center; justify-content: center; }
+  .modal-bg.open { display: flex; }
+  .modal { background: #1e1b4b; border: 1px solid rgba(99,102,241,0.4); border-radius: 16px; padding: 28px; width: 560px; max-width: 95vw; max-height: 85vh; overflow-y: auto; }
+  .modal h2 { font-size: 18px; font-weight: 700; color: #fff; margin-bottom: 6px; }
+  .modal p { font-size: 13px; color: #94a3b8; margin-bottom: 20px; }
+  .report-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+  .report-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 16px; cursor: pointer; transition: all 0.2s; }
+  .report-card:hover { border-color: #6366f1; background: rgba(99,102,241,0.12); }
+  .report-card.selected { border-color: #6366f1; background: rgba(99,102,241,0.2); }
+  .report-card h4 { font-size: 13px; font-weight: 600; color: #e2e8f0; margin-bottom: 4px; }
+  .report-card p { font-size: 12px; color: #64748b; margin: 0; }
+  .close-btn { background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 8px 16px; color: #94a3b8; font-size: 13px; cursor: pointer; }
+  .generate-btn { background: linear-gradient(135deg, #4f46e5, #0891b2); border: none; border-radius: 8px; padding: 8px 20px; color: #fff; font-size: 13px; font-weight: 600; cursor: pointer; }
+  .modal-footer { display: flex; gap: 10px; justify-content: flex-end; }
+  .report-output { display: none; margin-top: 18px; background: rgba(0,0,0,0.3); border-radius: 10px; padding: 16px; }
+  .report-output.show { display: block; }
+  .report-output h3 { font-size: 14px; color: #a5b4fc; margin-bottom: 12px; font-weight: 600; }
+  .report-output pre { font-size: 12px; color: #94a3b8; white-space: pre-wrap; line-height: 1.7; }
+  .copy-btn { margin-top: 10px; background: rgba(99,102,241,0.2); border: 1px solid rgba(99,102,241,0.3); border-radius: 6px; padding: 6px 14px; color: #a5b4fc; font-size: 12px; cursor: pointer; }
+
+  .stats-row { display: flex; gap: 12px; margin-bottom: 20px; }
+  .stat { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); border-radius: 10px; padding: 12px 18px; }
+  .stat-num { font-size: 22px; font-weight: 700; color: #a5b4fc; }
+  .stat-lbl { font-size: 11px; color: #64748b; margin-top: 2px; }
+
+  .no-results { text-align: center; padding: 40px; color: #475569; font-size: 14px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <div class="logo">⚡</div>
+    <h1>Salesforce Data Dictionary</h1>
+  </div>
+  <p>CleverTap · Internal Reference Guide for Reports & Dashboards</p>
+</div>
+
+<div class="how-to">
+  <div class="how-to-icon">💡</div>
+  <div>
+    <h3>How to use this dictionary</h3>
+    <p>Select an <strong style="color:#a5b4fc">Object</strong> below to explore its fields. Use the <strong style="color:#a5b4fc">search bar</strong> to find a specific field by name, API name, or description. Filter by <strong style="color:#a5b4fc">field type</strong> to narrow results. When you're ready to build a report, click <strong style="color:#6ee7b7">🗂 Build Report</strong> to get a ready-to-use field list and SQL-style snippet for your chosen object.</p>
+  </div>
+</div>
+
+<div class="objects-section">
+  <h2>Objects</h2>
+  <div class="obj-buttons" id="objButtons"></div>
+</div>
+
+<div class="content" id="mainContent"></div>
+
+<!-- Report Modal -->
+<div class="modal-bg" id="reportModal">
+  <div class="modal">
+    <h2>🗂 Build a Report</h2>
+    <p>Select the type of report you want to create for <span id="modalObjName" style="color:#a5b4fc;font-weight:600"></span>.</p>
+    <div class="report-grid" id="reportGrid"></div>
+    <div class="report-output" id="reportOutput">
+      <h3 id="reportOutputTitle"></h3>
+      <pre id="reportOutputContent"></pre>
+      <button class="copy-btn" onclick="copyReport()">📋 Copy to Clipboard</button>
+    </div>
+    <div class="modal-footer">
+      <button class="close-btn" onclick="closeModal()">Close</button>
+      <button class="generate-btn" onclick="generateReport()">Generate →</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const OBJECTS = {
+  Lead: {
+    icon: "🎯",
+    desc: "An unqualified prospect who has shown interest but hasn't been vetted yet. Once qualified, it converts into an Account, Contact and Opportunity.",
+    fields: [
+      ["First Name","FirstName","Text","First name of the lead"],
+      ["Last Name","LastName","Text","Last name of the lead"],
+      ["Lead Status","Status","Picklist","Current stage of the lead in the qualification process"],
+      ["Title","Title","Text","Job title of the lead"],
+      ["Company","Company","Text","Name of the company the lead belongs to"],
+      ["Email","Email","Email","Primary email address used for outreach"],
+      ["Phone","Phone","Phone","Office phone number of the lead"],
+      ["Mobile","MobilePhone","Phone","Mobile phone number for WhatsApp or direct calling"],
+      ["Lead Owner","OwnerId","Lookup(User)","Salesforce user (SDR/AE) responsible for this lead"],
+      ["Lead Lost Reason","Lead_Lost_Reason__c","Picklist","Primary reason why the lead was disqualified"],
+      ["Lead Lost Sub-reason","Lead_Lost_Sub_Reason__c","Picklist","Secondary or more specific reason for lead loss"],
+      ["Region","Region__c","Picklist","Geographic region — India, APAC, MEA, North America, South America or EU"],
+      ["Customer Segment","Customer_Segment__c","Formula (Text)","Market segment: Enterprise, Mid-Market, SMB based on employee size or ARR"],
+      ["MQL Attribution Medium","MQL_Attribution_Medium__c","Picklist","Marketing channel medium that drove the lead to MQL status"],
+      ["MQL Attribution Source","MQL_Attribution_Source__c","Text","Specific source (Google, LinkedIn, Webinar) that contributed to MQL"],
+      ["MQL Attribution Campaign","MQL_Attribution_Campaign__c","Text","Marketing campaign responsible for the lead reaching MQL stage"],
+      ["Warm Lead Date","Warm_Lead_Converted_Date__c","Date","Date when the lead was marked as warm"],
+      ["MQL Date","New_MQL_Converted_Date__c","Date","Date the lead reached MQL status"],
+      ["SQL Date","New_SQL_Converted_Date__c","Date","Date the lead was accepted as Sales Qualified Lead"],
+      ["Primary Business Model","Primary_Business_Model__c","Picklist","Business model: B2C, B2B, D2C"],
+      ["Platform Type","Platform_Type__c","Picklist","Type of platform: Mobile App, Web, Both"],
+      ["Employee","Employee__c","Picklist","Number of employees at the lead's company"],
+      ["Budget","Budget__c","Long Text","Lead's indicated or estimated budget"],
+      ["Authority","Authority__c","Picklist","Decision-making authority: Decision Maker, Influencer, Economic Buyer, Champion"],
+      ["Need Analysis","Need_Analysis_Start_here__c","Long Text","Summary of lead's pain points gathered during discovery"],
+      ["Timeline","Timeline__c","Picklist","Expected purchase timeline: Immediate, 1-3 months, 6+ months"],
+      ["Next Steps (SDR)","Next_Steps_SDR__c","Long Text","Agreed next actions and follow-up notes for this lead"],
+    ]
+  },
+  Account: {
+    icon: "🏢",
+    desc: "An organization record storing key details like ICP, employee size, region, website. Acts as the parent record for Contacts, Opportunities, and Contracts.",
+    fields: [
+      ["18-digit Account ID","X18_digit_Account_ID__c","Formula (Text)","18-digit unique Salesforce Account ID"],
+      ["Account Owner","Owner","Lookup(User)","AE responsible for managing and growing the account"],
+      ["Account Name","Name","Name","Name of the customer or prospect company"],
+      ["Region","Region__c","Picklist","Sales region — India, APAC, MEA, North America, South America, EU"],
+      ["Sub Region","Sub_Region_Master__c","Lookup(Sub Region Master)","More granular geography within a region"],
+      ["Account Status","Account_Status__c","Picklist","Current status: Active, Churned, Prospect, Debook, Trial"],
+      ["CT Org ID","CT_Account_Id__c","Text","CleverTap's internal Org ID linking Salesforce to the CleverTap platform"],
+      ["Business Segment FY25","BusinessSegmentFY25__c","Picklist","Segment classification: Enterprise, Key, Commercial, SMB"],
+      ["Digital Segmentation","Digital_Profile__c","Picklist","Categorization based on digital maturity or engagement profile"],
+      ["Sub Vertical","Sub_Vertical__c","Text","More specific industry classification within the account's vertical"],
+      ["C4S Account","Self_Serve_Account__c","Checkbox","Flag for self-serve (CleverTap for Startups) accounts"],
+      ["C4S to Enterprise","C4S_to_Enterprise__c","Checkbox","Flag for C4S accounts upgraded to Enterprise"],
+      ["ICP Business Model","ICP_Model__c","Picklist","Ideal Customer Profile: Fintech/Banking, Gaming, Subscription, etc."],
+      ["Employee","Employee__c","Picklist","Employee headcount band of the account"],
+      ["Contract Start Date","Contract_Start_Date__c","Date","Date when the customer's current active contract began"],
+      ["Contract End Date","Contract_End_Date__c","Date","Date when the current contract expires; key for renewal planning"],
+      ["Contract Term (Months)","Contract_Term__c","Number","Duration of the active contract in months"],
+      ["Annual Contract Value (USD)","Annual_Contract_Value_USD__c","Formula (Number)","Annual contract revenue from this account in USD"],
+      ["Recent PAS Score","LatestPASScore__c","Number","Latest Product Adoption Score"],
+      ["CSM","Customer_Success_Manager__c","Lookup(User)","Customer Success Manager assigned to this account"],
+      ["Regional CS Head","VP_CS__c","Lookup(User)","VP or Head of Customer Success for the account's region"],
+      ["TAM","Technical_Manager__c","Lookup(User)","Technical Account Manager assigned for technical guidance"],
+      ["Overall Health Score","OverallHealthScore__c","Formula (Number)","Composite score reflecting account health"],
+      ["Platform Utilization (Last Month)","PlatformUtilizationLASTMONTH__c","Percent","Platform capacity utilization in the previous month"],
+      ["Platform Utilization (Last 3M Avg)","PlatformUtilizationLAST3MONTHSAVG__c","Formula (Percent)","Rolling 3-month average of platform utilization"],
+      ["Last EBR Date","Last_EBR_Date__c","Date","Date of most recent Executive Business Review"],
+      ["Last VaaS Date","Last_VaaS_Date__c","Date","Date of most recent Value as a Service engagement"],
+      ["Onboarding Status","Onboarding_status__c","Picklist","Current onboarding stage with CleverTap"],
+      ["Go-Live Date","Go_Live_Date__c","Date","Date when customer went live on CleverTap's platform"],
+      ["Go-Live Quarter","Go_Live_Quarter__c","Picklist","Fiscal quarter in which account went live"],
+    ]
+  },
+  Opportunity: {
+    icon: "💼",
+    desc: "A tracked deal in an existing Account capturing the ACV, close date, forecast category, deal type (New Business, Upsell, Add-On, Renewal, etc.), region, and stage.",
+    fields: [
+      ["18-digit Account ID","X18_digit_Account_ID__c","Formula (Text)","18-digit unique Salesforce Account ID"],
+      ["Account Name","Account","Lookup(Account)","Name of the customer or prospect company"],
+      ["Opportunity Name","Name","Text","Unique name: Company – Deal Type – Year"],
+      ["Opportunity Owner","Owner","Lookup(User)","AE responsible for closing this opportunity"],
+      ["Stage","StageName","Picklist","Current stage: Discovery, Validity, Solution, Proposal, Negotiate"],
+      ["MQL Attribution Medium","MQL_Attribution_Medium__c","Picklist","Marketing channel that originally sourced this opportunity"],
+      ["Region","Region__c","Picklist","Sales region — India, APAC, MEA, North America, South America or EU"],
+      ["Close Date","CloseDate","Date","Target or actual date by which this deal is expected or closed"],
+      ["Type","Type","Picklist","Deal type: New Business, Upsell, Add-On, Renewal, Churn etc."],
+      ["Created Quarter","Created_Quarter__c","Formula (Text)","Fiscal quarter in which this opportunity was created"],
+      ["Forecast Category","ForecastCategoryName","Picklist","Forecast bucket: Pipeline, Upside, Commit, Closed Won, Omitted"],
+      ["Incremental ACV (USD)","Amount_USD__c","Formula (Number)","Net new revenue change from this deal: (PACV - ACV)"],
+      ["Booking ARR (USD)","Annual_Recurring_Revenue_ARR_USD__c","Formula (Number)","Annual Recurring Revenue booked from this deal in USD"],
+      ["Deal Competition","Deal_Competition__c","Picklist","Competitors faced during this deal (multi-select)"],
+      ["Competition Displacement","CompetitionDisplacement__c","Picklist","Incumbent being displaced if CleverTap wins"],
+      ["Lost/Won Reason","LostWonReason__c","Picklist","Primary reason this deal was won or lost"],
+      ["Lost/Won Sub-reason","LostWonSubreason__c","Picklist","More specific secondary reason behind the win or loss"],
+      ["Next Steps Summary","Next_Steps_Summary__c","Long Text","Agreed next actions and deal progress notes"],
+      ["Churn Cause","ChurnCauseNEW__c","Picklist","Primary reason a customer is churning"],
+      ["Churn Sub-Cause","ChurnSubCauseNEW__c","Picklist","More granular secondary reason behind the churn"],
+      ["SDR","SDR__c","Lookup(User)","SDR who sourced or qualified this opportunity"],
+      ["Partner Name","Partner_Name__c","Picklist","Channel or referral partner involved in this deal"],
+      ["Solution Engineer","Solution_Engineer__c","Lookup(User)","Pre-sales Solution Engineer assigned for technical support"],
+      ["Partner Manager","Partner_Manager__c","Lookup(User)","CleverTap Partner Manager overseeing partner relationship"],
+    ]
+  },
+  Contract: {
+    icon: "📄",
+    desc: "An executed agreement with a customer recording start/end dates, ACV, billing details, product plan, and status. Linked to an Account and used for renewals tracking and revenue recognition.",
+    fields: [
+      ["Contract Start Date","StartDate","Date","Date when the customer's contract officially begins"],
+      ["Contract End Date","EndDate","Date","Date when the contract expires; critical for renewal tracking"],
+      ["Account Name","Account","Lookup(Account)","Customer account this contract is associated with"],
+      ["Opportunity","SBQQ__Opportunity__c","Lookup(Opportunity)","Opportunity from which this Contract was created"],
+      ["Contract Term (months)","ContractTerm","Number","Duration of the contract in months"],
+      ["Legal Entity","Legal_Entity__c","Formula (Text)","CleverTap legal entity: USA, India, Singapore"],
+      ["Auto Renewal Clause","Auto_Renewal_Clause__c","Checkbox","Indicates whether the contract contains an auto-renewal clause"],
+      ["Auto-Renewal","Auto_Renewal__c","Checkbox","Indicates whether the contract is set to auto-renew"],
+      ["Billing Frequency","Billing_Frequency__c","Formula (Text)","How often the customer is invoiced: Monthly, Quarterly, Annual, Semiannual"],
+      ["Payment Term","Payment_Term__c","Formula (Text)","Days to pay after invoice: Due on receipt, Net 15, Net 30"],
+      ["Payment Method","Payment_Method__c","Formula (Text)","Payment method: Bank Transfer, CC, AWS"],
+      ["Annual Contract Value (USD)","Annual_Contract_Value_USD__c","Formula (Number)","Annual contract revenue in USD"],
+      ["Platform Discount %","PlatformDiscount__c","Formula (Percent)","Discount percentage applied to the platform fee"],
+      ["Primary Contact","Primary_Contact__c","Formula (Text)","Main point of contact at the customer's side"],
+      ["Billing Contact","Billing_Contact__c","Formula (Text)","Customer contact responsible for receiving invoices"],
+      ["Renewal Opportunity","SBQQ__RenewalOpportunity__c","Lookup(Opportunity)","Renewal opportunity to track upcoming contract renewal"],
+    ]
+  },
+  Contact: {
+    icon: "👤",
+    desc: "A record linked to an Account capturing name, email, phone, job title, and engagement details. Represents key stakeholders at customer or prospect companies.",
+    fields: [
+      ["Name","Name","Name","Full name of the contact person"],
+      ["Title","Title","Text","Job title of the contact"],
+      ["Email","Email","Email","Primary email address of the contact"],
+      ["Phone","Phone","Phone","Office or direct phone number of the contact"],
+      ["Account Name","Account","Lookup(Account)","Account this contact is associated with"],
+      ["Classification","Classification__c","Picklist","Contact relationship type: Champion, Economic Buyer, Influencer"],
+      ["Customer Role","Customer_Role__c","Picklist","Role: Admin, Decision Maker, End User"],
+      ["LinkedIn","LinkedIn__c","URL","LinkedIn profile URL of the contact"],
+      ["Contact Health Status","Contact_Health__c","Picklist","Health indicator: Green, Amber, Red"],
+    ]
+  },
+  Quote: {
+    icon: "📋",
+    desc: "A formal pricing proposal generated from an Opportunity, capturing product, ACV, discount, currency, and expiry date. Used to share pricing with prospects.",
+    fields: [
+      ["Quote Number","Name","Autonumber","Auto-generated unique identifier for this quote"],
+      ["Quote Name","Quote_Name__c","Text","Descriptive name for the quote"],
+      ["Quote Expiry Date","SBQQ__ExpirationDate__c","Date","Date after which the quote is no longer valid"],
+      ["Owner","Owner","Lookup(User)","Salesforce user responsible for managing this quote"],
+      ["Status","SBQQ__Status__c","Picklist","Quote status: Draft, In Review, Approved, Rejected"],
+      ["Primary","SBQQ__Primary__c","Checkbox","Marks this as the primary quote for the opportunity"],
+      ["Opportunity","SBQQ__Opportunity2__c","Lookup(Opportunity)","Opportunity associated with this quote"],
+      ["Account","SBQQ__Account__c","Lookup(Account)","Account for this quote"],
+      ["Auto Renewal Clause","Auto_renewal_clause__c","Checkbox","Indicates whether the contract includes an auto-renewal clause"],
+      ["Quote Type","Quote_Type__c","Picklist","Esign or File Upload"],
+      ["Legal Entity","Legal_Entity__c","Lookup(Legal Entity)","CleverTap legal entity for this quote"],
+      ["TFC","TFC_Termination_For_Convenience__c","Picklist","Termination For Convenience clause indicator"],
+      ["Is MSSA Involved?","IsMSSAInvolvedInSO__c","Picklist","Whether a Master Subscription and Services Agreement is included"],
+      ["Discount on WhatsApp Markup","DiscountonWhatsAppMarkup__c","Percent","Discount on WhatsApp Direct markup fee"],
+      ["Business Model","BusinessModel__c","Picklist","Business model: Transactional, Subscription, Fintech, Gaming"],
+      ["Competitive Intensity","CompetitiveIntensity__c","Picklist","Competitive pressure: High, Medium, Low"],
+      ["Incumbent in Play","PastExperience__c","Picklist","Incumbent vendor the customer is currently evaluating against"],
+      ["MAU/DP Averaging Period","MAUAveragingPeriod__c","Picklist","Averaging period for MAU/DP consumption"],
+      ["Email Averaging Period","Email_averaging_period__c","Picklist","Averaging period for Email consumption"],
+      ["Final Price Escalator","FinalPriceEscalator__c","Formula (Percent)","Annual price escalation percentage for multi-year deals"],
+      ["Billing Contact","Billing_Contact__c","Lookup(Contact)","Customer contact responsible for invoices"],
+      ["Primary Contact","SBQQ__PrimaryContact__c","Lookup(Contact)","Primary contact appearing on the generated quote"],
+      ["Legal Full Company Name","Legal_Full_Company_Name__c","Text","Full legal name of the customer company"],
+      ["Subscription Start Date","Subscription_Start_Date__c","Formula (Text)","Date on which the subscription starts"],
+      ["Subscription End Date","Subscription_End_Date__c","Formula (Text)","Date on which the subscription ends"],
+      ["Payment Terms","SBQQ__PaymentTerms__c","Picklist","Days to pay after invoice: Due on receipt, Net 15, Net 30"],
+      ["Free Access Period","AdditionalFreeMonths__c","Number","Additional months granted as free access"],
+      ["No of Trial Months","Trial_Term__c","Number","Months included in trial before paid subscription begins"],
+      ["Billing Method","Billing_Method__c","Picklist","Invoice, Credit Card, or Auto-Debit"],
+      ["No of Billing Months","Subscription Term","Number","Total subscription term in months"],
+      ["Pricing Model","Billing_Plan__c","Picklist","Pricing structure: MAU-FY23, DP-FY23"],
+      ["Billing Frequency","SBQQ__BillingFrequency__c","Picklist","How often invoiced: Monthly, Quarterly, Annual, Semiannual"],
+      ["Payment Method","Payment_Method__c","Picklist","Bank Transfer, CC, AWS"],
+      ["Total Quote Discount %","Total_quote_discount__c","Formula (Percent)","Total discount across all line items"],
+      ["Platform Discount %","Total_Discount__c","Formula (Percent)","Discount applied to the platform fee"],
+    ]
+  }
+};
+
+const REPORT_TYPES = {
+  Lead: [
+    { title: "Lead Funnel Report", desc: "Track leads from Warm → MQL → SQL by region and SDR" },
+    { title: "Lead Lost Analysis", desc: "Breakdown of lost reasons, sub-reasons and segments" },
+    { title: "MQL Attribution Report", desc: "MQL volume by channel, source and campaign" },
+    { title: "SDR Activity Report", desc: "Next steps, timelines and authority mapping per SDR" },
+  ],
+  Account: [
+    { title: "Account Health Dashboard", desc: "Health scores, PAS scores and platform utilization" },
+    { title: "Renewal Pipeline Report", desc: "Contract end dates, ACV at risk and renewal status" },
+    { title: "Onboarding Status Report", desc: "Go-live dates, onboarding stages by CSM and region" },
+    { title: "Segment & Vertical Analysis", desc: "ACV breakdown by business segment and vertical" },
+  ],
+  Opportunity: [
+    { title: "Pipeline Report", desc: "Open deals by stage, region, ACV and forecast category" },
+    { title: "Win/Loss Analysis", desc: "Closed deals by won/lost reason and competition" },
+    { title: "Bookings & ARR Report", desc: "Booking ARR by deal type, region and quarter" },
+    { title: "Churn Analysis Report", desc: "Churned deals by cause, sub-cause and AE" },
+  ],
+  Contract: [
+    { title: "Renewal Tracker", desc: "Contracts by end date, ACV and renewal opportunity" },
+    { title: "Billing & Payment Report", desc: "Billing frequency, method and payment terms overview" },
+    { title: "Discount Analysis", desc: "Platform discount percentages across active contracts" },
+    { title: "Legal Entity Report", desc: "Contract distribution by legal entity and term length" },
+  ],
+  Contact: [
+    { title: "Stakeholder Map", desc: "Contacts by classification, role and health status" },
+    { title: "Champion Coverage Report", desc: "Champion and Economic Buyer coverage per account" },
+    { title: "Contact Health Report", desc: "Red/Amber/Green status across accounts" },
+    { title: "Engagement Overview", desc: "Contacts by account with titles and LinkedIn coverage" },
+  ],
+  Quote: [
+    { title: "Quote Approval Report", desc: "Quotes by status (Draft, Approved, Rejected) and owner" },
+    { title: "Discount Report", desc: "Platform and WhatsApp discount percentages per quote" },
+    { title: "Pricing Model Analysis", desc: "Quotes by billing plan, frequency and payment method" },
+    { title: "Competitive Intensity Report", desc: "Deals by competitive intensity and incumbent in play" },
+  ]
+};
+
+let currentObj = "Lead";
+let selectedReport = null;
+let currentFilter = "All";
+
+function getTypeClass(type) {
+  if (type.includes("Picklist")) return "type-Picklist";
+  if (type.includes("Date")) return "type-Date";
+  if (type.includes("Lookup")) return "type-Lookup";
+  if (type.includes("Formula")) return "type-Formula";
+  if (type.includes("Checkbox")) return "type-Checkbox";
+  if (type.includes("Number")) return "type-Number";
+  if (type.includes("Currency")) return "type-Currency";
+  if (type.includes("Phone")) return "type-Phone";
+  if (type.includes("Email")) return "type-Email";
+  if (type.includes("URL")) return "type-URL";
+  if (type.includes("Percent")) return "type-Percent";
+  if (type.includes("Long")) return "type-Long";
+  if (type.includes("Autonumber")) return "type-Autonumber";
+  return "type-Text";
+}
+
+function renderObjectButtons() {
+  const container = document.getElementById("objButtons");
+  container.innerHTML = "";
+  Object.keys(OBJECTS).forEach(obj => {
+    const d = OBJECTS[obj];
+    const btn = document.createElement("button");
+    btn.className = "obj-btn" + (obj === currentObj ? " active" : "");
+    btn.innerHTML = `${d.icon} ${obj} <span class="obj-badge">${d.fields.length}</span>`;
+    btn.onclick = () => { currentObj = obj; currentFilter = "All"; renderAll(); };
+    container.appendChild(btn);
+  });
+}
+
+function getTypes() {
+  const types = new Set();
+  OBJECTS[currentObj].fields.forEach(f => {
+    const t = f[2].split(" ")[0].replace("(","");
+    types.add(t);
+  });
+  return ["All", ...Array.from(types).sort()];
+}
+
+function renderContent(search = "") {
+  const obj = OBJECTS[currentObj];
+  const allFields = obj.fields;
+  const filtered = allFields.filter(f => {
+    const matchSearch = !search || [f[0],f[1],f[2],f[3]].some(v => v.toLowerCase().includes(search.toLowerCase()));
+    const matchType = currentFilter === "All" || f[2].includes(currentFilter);
+    return matchSearch && matchType;
+  });
+
+  const customCount = allFields.filter(f => f[1].includes("__c")).length;
+  const typeSet = new Set(allFields.map(f => f[2].split(" ")[0]));
+
+  const types = getTypes();
+
+  document.getElementById("mainContent").innerHTML = `
+    <div class="obj-header">
+      <div class="obj-title">${obj.icon} ${currentObj}</div>
+      <div class="obj-desc">${obj.desc}</div>
+    </div>
+    <div class="stats-row">
+      <div class="stat"><div class="stat-num">${allFields.length}</div><div class="stat-lbl">Total Fields</div></div>
+      <div class="stat"><div class="stat-num">${customCount}</div><div class="stat-lbl">Custom Fields</div></div>
+      <div class="stat"><div class="stat-num">${typeSet.size}</div><div class="stat-lbl">Field Types</div></div>
+    </div>
+    <div class="toolbar">
+      <input class="search-box" id="searchInput" placeholder="🔍  Search field name, API name, or description…" value="${search}" oninput="renderContent(this.value)"/>
+      ${types.map(t => `<button class="filter-btn ${currentFilter===t?'active-filter':''}" onclick="setFilter('${t}')">${t}</button>`).join("")}
+      <button class="report-btn" onclick="openModal()">🗂 Build Report</button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Field Name</th><th>API Name</th><th>Field Type</th><th>Description</th></tr></thead>
+        <tbody>
+          ${filtered.length === 0 ? `<tr><td colspan="4" class="no-results">No fields match your search.</td></tr>` :
+            filtered.map(f => {
+              const isCustom = f[1].includes("__c");
+              return `<tr>
+                <td>${f[0]}</td>
+                <td><span class="api-name ${isCustom?'custom-field':''}">${f[1]}</span></td>
+                <td><span class="type-badge ${getTypeClass(f[2])}">${f[2]}</span></td>
+                <td>${f[3]}</td>
+              </tr>`;
+            }).join("")
+          }
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+function setFilter(type) {
+  currentFilter = type;
+  renderContent(document.getElementById("searchInput")?.value || "");
+}
+
+function openModal() {
+  selectedReport = null;
+  document.getElementById("modalObjName").textContent = currentObj;
+  document.getElementById("reportOutput").classList.remove("show");
+  const grid = document.getElementById("reportGrid");
+  grid.innerHTML = REPORT_TYPES[currentObj].map((r,i) => `
+    <div class="report-card" id="rc${i}" onclick="selectReport(${i})">
+      <h4>${r.title}</h4>
+      <p>${r.desc}</p>
+    </div>
+  `).join("");
+  document.getElementById("reportModal").classList.add("open");
+}
+
+function selectReport(i) {
+  selectedReport = i;
+  document.querySelectorAll(".report-card").forEach((c,j) => c.classList.toggle("selected", j===i));
+}
+
+function generateReport() {
+  if (selectedReport === null) { alert("Please select a report type."); return; }
+  const r = REPORT_TYPES[currentObj][selectedReport];
+  const obj = OBJECTS[currentObj];
+  const fields = obj.fields;
+
+  // Pick relevant fields for the report based on report title keyword hints
+  const keywords = r.title.toLowerCase();
+  let relevantFields = fields;
+  if (keywords.includes("funnel") || keywords.includes("mql") || keywords.includes("sql")) {
+    relevantFields = fields.filter(f => f[1].includes("Date") || f[2].includes("Date") || f[0].toLowerCase().includes("date") || f[0].toLowerCase().includes("mql") || f[0].toLowerCase().includes("sql") || f[0].toLowerCase().includes("status") || f[0].toLowerCase().includes("region") || f[0].toLowerCase().includes("owner"));
+  } else if (keywords.includes("health") || keywords.includes("score")) {
+    relevantFields = fields.filter(f => f[0].toLowerCase().includes("health") || f[0].toLowerCase().includes("score") || f[0].toLowerCase().includes("utilization") || f[0].toLowerCase().includes("csm") || f[0].toLowerCase().includes("region") || f[0].toLowerCase().includes("status"));
+  } else if (keywords.includes("churn") || keywords.includes("lost") || keywords.includes("loss")) {
+    relevantFields = fields.filter(f => f[0].toLowerCase().includes("churn") || f[0].toLowerCase().includes("lost") || f[0].toLowerCase().includes("reason") || f[0].toLowerCase().includes("region") || f[0].toLowerCase().includes("type") || f[0].toLowerCase().includes("owner"));
+  } else if (keywords.includes("discount") || keywords.includes("pricing") || keywords.includes("billing")) {
+    relevantFields = fields.filter(f => f[0].toLowerCase().includes("discount") || f[0].toLowerCase().includes("billing") || f[0].toLowerCase().includes("payment") || f[0].toLowerCase().includes("price") || f[0].toLowerCase().includes("acv") || f[0].toLowerCase().includes("term"));
+  }
+  if (relevantFields.length < 3) relevantFields = fields.slice(0, 10);
+
+  const fieldLines = relevantFields.map(f => `  ${f[1]}`).join(",\n");
+  const reportSnippet = `-- ${r.title} (${currentObj})\n-- ${r.desc}\n\nSELECT\n${fieldLines}\nFROM ${currentObj}\nWHERE IsDeleted = false\n-- Add your filters below:\n-- AND Region__c = 'India'\n-- AND CreatedDate = LAST_N_DAYS:30\nORDER BY CreatedDate DESC\nLIMIT 2000`;
+
+  document.getElementById("reportOutputTitle").textContent = `📊 ${r.title} — Field List & SOQL Snippet`;
+  document.getElementById("reportOutputContent").textContent = reportSnippet;
+  document.getElementById("reportOutput").classList.add("show");
+}
+
+function copyReport() {
+  const text = document.getElementById("reportOutputContent").textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.querySelector(".copy-btn");
+    btn.textContent = "✅ Copied!";
+    setTimeout(() => btn.textContent = "📋 Copy to Clipboard", 2000);
+  });
+}
+
+function closeModal() {
+  document.getElementById("reportModal").classList.remove("open");
+}
+
+function renderAll() {
+  renderObjectButtons();
+  renderContent();
+}
+
+document.getElementById("reportModal").addEventListener("click", function(e) {
+  if (e.target === this) closeModal();
+});
+
+renderAll();
+</script>
+</body>
+</html>
